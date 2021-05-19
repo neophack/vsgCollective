@@ -34,7 +34,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # Dynamic vs Static Linking
-option(VSGFCOLLECTIVE_SHARED_LIBRARY "Set to ON to build libraries for dynamic linking.  Use OFF for static." ON)
+option(VSGCOLLECTIVE_SHARED_LIBRARY "Set to ON to build libraries for dynamic linking.  Use OFF for static." ON)
 
 add_custom_target(clobber
     COMMAND git clean -d -f -x
@@ -53,15 +53,17 @@ else()
     set(DEFAULT_LIB_SUFFIX ${CMAKE_STATIC_LIBRARY_SUFFIX})
 endif()
 
+##############################################################################################################
+#
+# VulkkanSDK
+#
 if (VULKAN_SDK)
     set(ENV{VULKAN_SDK} ${VULKAN_SDK})
+    find_package(Vulkan)
 endif()
 
-find_package(Vulkan)
-
 if (NOT VULKAN_FOUND)
-
-    set(VulkanSDKVersion "1.2.131.2" CACHE STRING "Vulkan_SDK version to download")
+    set(VulkanSDKVersion "1.2.176.1" CACHE STRING "Vulkan_SDK version to download")
 
     if (NOT EXISTS ${DOWNLOADS_DIR}/${VulkanSDKVersion})
 
@@ -80,12 +82,9 @@ if (NOT VULKAN_FOUND)
         set(ENV{VULKAN_SDK} ${VULKAN_SDK})
         set(EXTRA_CMAKE_ARGS_VULKAN_SDK -DVULKAN_SDK=${VULKAN_SDK})
 
-        message("VULKAN_SDK = " $ENV{VULKAN_SDK})
-
         find_package(Vulkan)
 
     endif()
-
 endif()
 
 
@@ -93,41 +92,49 @@ endif()
 #
 # glslang
 #
-ExternalProject_Add(glslang
-    PREFIX components
-    GIT_REPOSITORY "https://github.com/KhronosGroup/glslang.git"
-    GIT_TAG "master"
-    SOURCE_DIR components/glslang
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
-)
-
+OPTION(build_glslang "Build glslang" ON)
+if (${build_glslang})
+    ExternalProject_Add(glslang
+        PREFIX components
+        GIT_REPOSITORY "https://github.com/KhronosGroup/glslang.git"
+        GIT_TAG "master"
+        SOURCE_DIR components/glslang
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+    )
+endif()
 
 ##############################################################################################################
 #
 # VulkaSceneGraph
 #
-ExternalProject_Add(VulkanSceneGraph
-    PREFIX components
-    GIT_REPOSITORY "https://github.com/vsg-dev/VulkanSceneGraph.git"
-    GIT_TAG "master"
-    SOURCE_DIR components/VulkanSceneGraph
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
-)
-ExternalProject_Add_StepDependencies(VulkanSceneGraph build glslang)
+OPTION(build_VulkanSceneGraph "Build VulkanSceneGraph" ON)
+if (${build_VulkanSceneGraph})
+    ExternalProject_Add(VulkanSceneGraph
+        PREFIX components
+        GIT_REPOSITORY "https://github.com/vsg-dev/VulkanSceneGraph.git"
+        GIT_TAG "master"
+        SOURCE_DIR components/VulkanSceneGraph
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+    )
+    ExternalProject_Add_StepDependencies(VulkanSceneGraph build glslang)
+endif()
 
 
 ##############################################################################################################
 #
 # vsgGIS
 #
-ExternalProject_Add(vsgGIS
-    PREFIX components
-    GIT_REPOSITORY "https://github.com/vsg-dev/vsgGIS.git"
-    GIT_TAG "master"
-    SOURCE_DIR components/vsgGIS
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
-)
-ExternalProject_Add_StepDependencies(vsgGIS build VulkanSceneGraph)
+OPTION(build_vsgGIS "Build vsgGIS" ON)
+if (${build_vsgGIS})
+    ExternalProject_Add(vsgGIS
+        PREFIX components
+        GIT_REPOSITORY "https://github.com/vsg-dev/vsgGIS.git"
+        GIT_TAG "master"
+        SOURCE_DIR components/vsgGIS
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+    )
+    ExternalProject_Add_StepDependencies(vsgGIS build VulkanSceneGraph)
+endif()
 
 
 
@@ -135,52 +142,64 @@ ExternalProject_Add_StepDependencies(vsgGIS build VulkanSceneGraph)
 #
 # assimp
 #
-ExternalProject_Add(assimp
-    PREFIX components
-    GIT_REPOSITORY "https://github.com/assimp/assimp.git"
-    GIT_TAG "master"
-    SOURCE_DIR components/assimp
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
-)
+OPTION(build_assimp "Build assimp" ON)
+if (${build_assimp})
+    ExternalProject_Add(assimp
+        PREFIX components
+        GIT_REPOSITORY "https://github.com/assimp/assimp.git"
+        GIT_TAG "master"
+        SOURCE_DIR components/assimp
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+    )
+endif()
 
 
 ##############################################################################################################
 #
 # vsgXchange
 #
-ExternalProject_Add(vsgXchange
-    PREFIX components
-    GIT_REPOSITORY "https://github.com/vsg-dev/vsgXchange.git"
-    GIT_TAG "master"
-    SOURCE_DIR components/vsgXchange
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
-)
-ExternalProject_Add_StepDependencies(vsgXchange build assimp vsgGIS VulkanSceneGraph)
+OPTION(build_vsgXchange "Build vsgXchange" ON)
+if (${build_vsgXchange})
+    ExternalProject_Add(vsgXchange
+        PREFIX components
+        GIT_REPOSITORY "https://github.com/vsg-dev/vsgXchange.git"
+        GIT_TAG "master"
+        SOURCE_DIR components/vsgXchange
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+    )
+    ExternalProject_Add_StepDependencies(vsgXchange build assimp vsgGIS VulkanSceneGraph)
+endif()
 
 
 ##############################################################################################################
 #
 # vsgImGui
 #
-ExternalProject_Add(vsgImGui
-    PREFIX components
-    GIT_REPOSITORY "https://github.com/vsg-dev/vsgImGui.git"
-    GIT_TAG "master"
-    SOURCE_DIR components/vsgImGui
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
-)
-ExternalProject_Add_StepDependencies(vsgImGui build vsgXchange VulkanSceneGraph)
+OPTION(build_vsgImGui "Build vsgImGui" ON)
+if (${build_vsgImGui})
+    ExternalProject_Add(vsgImGui
+        PREFIX components
+        GIT_REPOSITORY "https://github.com/vsg-dev/vsgImGui.git"
+        GIT_TAG "master"
+        SOURCE_DIR components/vsgImGui
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+    )
+    ExternalProject_Add_StepDependencies(vsgImGui build vsgXchange VulkanSceneGraph)
+endif()
 
 
 ##############################################################################################################
 #
 # vsgExamples
 #
-ExternalProject_Add(vsgExamples
-    PREFIX components
-    GIT_REPOSITORY "https://github.com/vsg-dev/vsgExamples.git"
-    GIT_TAG "master"
-    SOURCE_DIR components/vsgExamples
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
-)
-ExternalProject_Add_StepDependencies(vsgExamples build VulkanSceneGraph vsgXchange vsgImGui)
+OPTION(build_vsgExamples "Build vsgExamples" ON)
+if (${build_vsgExamples})
+    ExternalProject_Add(vsgExamples
+        PREFIX components
+        GIT_REPOSITORY "https://github.com/vsg-dev/vsgExamples.git"
+        GIT_TAG "master"
+        SOURCE_DIR components/vsgExamples
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+    )
+    ExternalProject_Add_StepDependencies(vsgExamples build VulkanSceneGraph vsgXchange vsgImGui)
+endif()
