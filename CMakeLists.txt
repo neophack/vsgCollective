@@ -68,8 +68,6 @@ if (NOT VULKAN_FOUND)
 
     if (NOT EXISTS ${DOWNLOADS_DIR}/${VulkanSDKVersion})
 
-        message("Will attempt to download : " ${VulkanSDKVersion})
-
         file(MAKE_DIRECTORY downloads)
 
         execute_process(COMMAND wget --no-cookies -O ${DOWNLOADS_DIR}/vulkansdk-linux-x86_64-${VulkanSDKVersion}.tar.gz https://sdk.lunarg.com/sdk/download/${VulkanSDKVersion}/linux/vulkansdk-linux-x86_64-${VulkanSDKVersion}.tar.gz)
