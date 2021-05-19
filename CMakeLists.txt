@@ -130,6 +130,20 @@ ExternalProject_Add(vsgGIS
 ExternalProject_Add_StepDependencies(vsgGIS build VulkanSceneGraph)
 
 
+
+##############################################################################################################
+#
+# assimp
+#
+ExternalProject_Add(assimp
+    PREFIX components
+    GIT_REPOSITORY "https://github.com/assimp/assimp.git"
+    GIT_TAG "master"
+    SOURCE_DIR components/assimp
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
+)
+
+
 ##############################################################################################################
 #
 # vsgXchange
@@ -141,7 +155,7 @@ ExternalProject_Add(vsgXchange
     SOURCE_DIR components/vsgXchange
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR} -DCMAKE_PREFIX_PATH=${PREFIX_PATH} -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} "${EXTRA_CMAKE_ARGS_VULKAN_SDK}"
 )
-ExternalProject_Add_StepDependencies(vsgXchange build vsgGIS VulkanSceneGraph)
+ExternalProject_Add_StepDependencies(vsgXchange build assimp vsgGIS VulkanSceneGraph)
 
 
 ##############################################################################################################
