@@ -59,8 +59,9 @@ endif()
 #
 if (VULKAN_SDK)
     set(ENV{VULKAN_SDK} ${VULKAN_SDK})
-    find_package(Vulkan)
 endif()
+
+find_package(Vulkan)
 
 if (NOT VULKAN_FOUND)
     set(VulkanSDKVersion "1.2.176.1" CACHE STRING "Vulkan_SDK version to download")
