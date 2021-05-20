@@ -136,7 +136,7 @@ if (${build_vsgGIS})
         GIT_TAG "master"
         CMAKE_ARGS ${COMPONENT_CMAKE_OPTIONS}
     )
-    ExternalProject_Add_StepDependencies(vsgGIS build VulkanSceneGraph)
+    ExternalProject_Add_StepDependencies(vsgGIS build ${VulkanSceneGraph})
 endif()
 
 
